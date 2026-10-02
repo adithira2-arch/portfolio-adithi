@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>your desktop</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap');
+
+  :root{
+    --sky-top: #cfe8f3;
+    --sky-bottom: #e9e3f7;
+    --panel: #fffdf7;
+    --ink: #2b2438;
+    --ink-soft: #6b6178;
+    --accent: #f5c84c;
+    --accent-2: #e5989b;
+    --accent-3: #7bc9a0;
+    --border: #2b2438;
+  }
+
+  body.dark{
+    --sky-top: #171432;
+    --sky-bottom: #0d0b1f;
+    --panel: #2b2540;
+    --ink: #f2eefb;
+    --ink-soft: #b3a8d1;
+    --accent: #f5c84c;
+    --accent-2: #e5989b;
+    --accent-3: #4d7a63;
+    --border: #f2eefb;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Nunito', sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+    overflow-x:hidden;
+    position:relative;
+    transition: background .4s ease, color .4s ease;
+  }
+
+  /* ---------- mode toggle ---------- */
+  .mode-toggle{
+    position:fixed;
+    top:20px; right:20px;
+    z-index:20;
+    width:52px; height:52px;
+    border-radius:50%;
+    background: var(--panel);
+    border: 2.5px solid var(--border);
+    box-shadow: 3px 3px 0 var(--border);
+    cursor:pointer;
+    font-size:22px;
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .12s ease, background .4s ease, border-color .4s ease;
+  }
+  .mode-toggle:hover{
+    transform: translate(-2px,-2px);
+    box-shadow: 5px 5px 0 var(--border);
+  }
+  .mode-toggle:active{
+    transform: translate(1px,1px);
+    box-shadow: 2px 2px 0 var(--border);
+  }
+
+  .hero{
+    position:relative;
+    min-height:100vh;
+    overflow:hidden;
+  }
+
+  /* ---------- ground / hills ---------- */
+  .ground{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:110px;
+    background: var(--accent-3);
+    border-top: 3px solid var(--border);
+    z-index:1;
+  }
+  .ground::before{
+    content:"";
+    position:absolute;
+    top:-40px; left:-5%;
+    width:110%; height:60px;
+    background: var(--accent-3);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    opacity:0.6;
+  }
+
+  /* clouds */
+  .cloud{
+    position:absolute;
+    background:#fff;
+    border-radius:50px;
+    opacity:0.85;
+    z-index:0;
+  }
+  .cloud::before, .cloud::after{
+    content:"";
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+  }
+  .cloud1{ width:90px; height:34px; top:8%; left:10%; }
+  .cloud1::before{ width:50px; height:50px; top:-24px; left:10px; }
+  .cloud1::after{ width:36px; height:36px; top:-16px; left:50px; }
+  .cloud2{ width:70px; height:26px; top:16%; right:14%; animation: drift 26s linear infinite; }
+  .cloud2::before{ width:40px; height:40px; top:-18px; left:8px; }
+  .cloud2::after{ width:28px; height:28px; top:-12px; left:38px; }
+  .cloud3{ width:60px; height:22px; top:26%; left:60%; animation: drift 34s linear infinite reverse; }
+  .cloud3::before{ width:34px; height:34px; top:-16px; left:6px; }
+
+  @keyframes drift{
+    0%{ transform: translateX(0); }
+    50%{ transform: translateX(30px); }
+    100%{ transform: translateX(0); }
+  }
+
+  body.dark .cloud{ opacity:0; }
+
+  /* stars */
+  .star{
+    position:absolute;
+    width:12px; height:12px;
+    background:#fff;
+    clip-path: polygon(
+      50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%
+    );
+    opacity:0;
+    z-index:0;
+    transition: opacity .5s ease;
+  }
+  body.dark .star{
+    opacity:1;
+    animation: twinkle 2.6s ease-in-out infinite;
+  }
+  .star.big{ width:18px; height:18px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.7)); }
+  @keyframes twinkle{
+    0%, 100%{ opacity:0.35; transform: scale(0.85); }
+    50%{ opacity:1; transform: scale(1); }
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding: 64px 20px 24px;
+  }
+  header h1{
+    font-family:'Baloo 2', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin:0 0 8px;
+  }
+  header p{
+    margin:0;
+    color: var(--ink-soft);
+    font-size:1.05rem;
+  }
+
+  /* ---------- desktop icons ---------- */
+  .icons{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap: 28px;
+    padding: 40px 20px 160px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    width:96px;
+    font-family:'Nunito', sans-serif;
+    color: var(--ink);
+  }
+  .icon-glyph{
+    width:64px; height:64px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:34px;
+    transition: transform .12s ease;
+  }
+  .icon-btn:hover .icon-glyph{
+    transform: translateY(-3px);
+  }
+  .icon-btn:active .icon-glyph{
+    transform: translateY(1px);
+  }
+  .icon-label{
+    font-weight:700;
+    font-size:0.9rem;
+  }
+
+  /* ---------- mascot ---------- */
+  .mascot-wrap{
+    position:absolute;
+    bottom:106px;
+    left:0;
+    z-index:3;
+    animation: walk 60s linear infinite;
+    cursor:pointer;
+  }
+  .mascot-wrap.paused{
+    animation-play-state: paused;
+  }
+  @keyframes walk{
+    0%   { left: -60px; transform: scaleX(1); }
+    48%  { left: calc(100% - 20px); transform: scaleX(1); }
+    50%  { left: calc(100% - 20px); transform: scaleX(-1); }
+    98%  { left: -60px; transform: scaleX(-1); }
+    100% { left: -60px; transform: scaleX(1); }
+  }
+  .mascot{
+    width:56px; height:40px;
+    animation: sway 1.2s ease-in-out infinite alternate;
+    transform-origin: center bottom;
+  }
+  .mascot-wrap.paused .mascot{
+    animation: dance 0.9s ease-in-out infinite;
+  }
+  @keyframes sway{
+    from{ transform: rotate(-2deg); }
+    to{ transform: rotate(2deg); }
+  }
+  @keyframes dance{
+    0%   { transform: translateY(0) rotate(-2deg) scaleX(1) scaleY(1); }
+    25%  { transform: translateY(-2.5px) rotate(2deg) scaleX(0.985) scaleY(1.02); }
+    50%  { transform: translateY(0) rotate(0deg) scaleX(1.02) scaleY(0.98); }
+    75%  { transform: translateY(-2.5px) rotate(-2deg) scaleX(0.985) scaleY(1.02); }
+    100% { transform: translateY(0) rotate(-2deg) scaleX(1) scaleY(1); }
+  }
+
+  .note{
+    position:absolute;
+    top:-4px;
+    font-size:14px;
+    opacity:0;
+    pointer-events:none;
+  }
+  .mascot-wrap.paused .note{
+    animation: float-note 1.8s ease-in infinite;
+  }
+  .note1{ left:2px; animation-delay:0s !important; }
+  .note2{ left:24px; animation-delay:.6s !important; }
+  .note3{ left:44px; animation-delay:1.2s !important; }
+  @keyframes float-note{
+    0%   { opacity:0; transform: translateY(0) rotate(-8deg) scale(0.8); }
+    15%  { opacity:1; }
+    70%  { opacity:1; }
+    100% { opacity:0; transform: translateY(-30px) rotate(10deg) scale(1.1); }
+  }
+
+  /* ---------- modal window ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(43,36,56,0.35);
+    z-index:10;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.open{ display:flex; }
+  .window{
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius:16px;
+    box-shadow: 8px 8px 0 var(--border);
+    max-width: 480px;
+    width:100%;
+    max-height: 80vh;
+    overflow-y:auto;
+  }
+  .window-titlebar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 12px 16px;
+    border-bottom: 2.5px solid var(--border);
+    background: var(--accent);
+    border-radius: 13px 13px 0 0;
+  }
+  .window-titlebar span{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+  }
+  .window-close{
+    width:28px; height:28px;
+    border-radius:50%;
+    border: 2px solid var(--border);
+    background: var(--panel);
+    cursor:pointer;
+    font-weight:700;
+    line-height:1;
+    font-family: inherit;
+  }
+  .window-body{
+    padding: 22px 24px 26px;
+    line-height:1.55;
+  }
+  .window-body h3{
+    font-family:'Baloo 2', sans-serif;
+    margin-top:0;
+  }
+  .about-photo{
+    float:right;
+    width:140px; height:140px;
+    border-radius:20px;
+    object-fit:cover;
+    border: 2.5px solid var(--border);
+    box-shadow: 3px 3px 0 var(--border);
+    margin: 0 0 10px 16px;
+  }
+  .window-body a{ color: var(--ink); }
+  .tag-row{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top:14px;
+  }
+  .tag{
+    background: var(--accent-3);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size:0.85rem;
+    font-weight:700;
+  }
+  a.tag{
+    color: var(--ink);
+    text-decoration: none;
+    display:inline-block;
+  }
+  a.tag:hover{
+    transform: translateY(-2px);
+  }
+  .proj{
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+  }
+  .proj h4{ margin: 0 0 4px; font-family:'Baloo 2', sans-serif; }
+  .proj p{ margin:0; color: var(--ink-soft); font-size:0.92rem; }
+  .proj-clickable{
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .proj-clickable:hover{
+    transform: translate(-2px,-2px);
+    box-shadow: 4px 4px 0 var(--border);
+  }
+
+  /* ---------- video player ---------- */
+  .video-window{ max-width: 560px; }
+  .video-gallery{
+    padding: 18px;
+    display:flex;
+    flex-direction:column;
+    gap: 20px;
+    max-height: 70vh;
+    overflow-y:auto;
+  }
+  .video-caption{
+    margin: 8px 0 0;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    text-align:center;
+  }
+  .video-cover{
+    position:relative;
+    width:100%;
+    aspect-ratio: 16 / 9;
+    background: var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    overflow:hidden;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+  }
+  .video-cover video{
+    width:100%; height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .video-cover .play-btn{
+    position:absolute;
+    width:56px; height:56px;
+    border-radius:50%;
+    background: var(--panel);
+    border: 2.5px solid var(--border);
+    box-shadow: 3px 3px 0 var(--border);
+    font-size:20px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .video-cover:hover .play-btn{
+    transform: scale(1.08);
+  }
+  .video-cover.playing .play-btn{
+    display:none;
+  }
+
+  /* ---------- video lightbox (bigger popup player) ---------- */
+  .lightbox-overlay{
+    position:fixed; inset:0;
+    background: rgba(13,11,31,0.85);
+    z-index:30;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+  }
+  .lightbox-overlay.open{ display:flex; }
+  .lightbox-content{
+    position:relative;
+    max-width: 90vw;
+    max-height: 88vh;
+  }
+  .lightbox-content video{
+    display:block;
+    max-width: 90vw;
+    max-height: 88vh;
+    border-radius: 14px;
+    border: 3px solid var(--border);
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
+    background:#000;
+  }
+  .lightbox-close{
+    position:absolute;
+    top:-16px; right:-16px;
+    width:36px; height:36px;
+    border-radius:50%;
+    background: var(--panel);
+    border: 2.5px solid var(--border);
+    box-shadow: 3px 3px 0 var(--border);
+    cursor:pointer;
+    font-weight:700;
+    font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  footer{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding: 0 20px 60px;
+    color: var(--ink-soft);
+    font-size:0.85rem;
+  }
+
+  /* ---------- work section ---------- */
+  .work-section{
+    position:relative;
+    z-index:2;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 24px 40px;
+    scroll-margin-top: 40px;
+  }
+  .work-section h2{
+    font-family:'Baloo 2', sans-serif;
+    font-size: 1.8rem;
+    text-align:center;
+    margin: 0 0 24px;
+  }
+  .work-section .proj{
+    background: var(--panel);
+    box-shadow: 3px 3px 0 var(--border);
+  }
+  .disclaimer-box{
+    max-width: 320px;
+    margin: 140px auto 100px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: var(--panel);
+    box-shadow: 3px 3px 0 var(--border);
+    cursor:pointer;
+    text-align:center;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .disclaimer-box:hover{
+    transform: translate(-2px,-2px);
+    box-shadow: 5px 5px 0 var(--border);
+  }
+  .disclaimer-title{
+    margin:0;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+  }
+  .disclaimer-text{
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    margin:0;
+    font-size:0.88rem;
+    color: var(--ink-soft);
+    transition: max-height .3s ease, opacity .3s ease, margin-top .3s ease;
+  }
+  .disclaimer-box.open .disclaimer-text{
+    max-height:120px;
+    opacity:1;
+    margin-top:10px;
+  }
+</style>
+</head>
+<body class="dark">
+
+  <button class="mode-toggle" id="modeToggle" onclick="toggleMode()" aria-label="toggle dark mode">☀️</button>
+
+  <div class="hero">
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+
+    <div class="star" style="top:10%; left:8%;"></div>
+    <div class="star big" style="top:14%; left:22%; animation-delay:.4s;"></div>
+    <div class="star" style="top:8%; left:38%; animation-delay:.8s;"></div>
+    <div class="star" style="top:20%; left:50%; animation-delay:1.2s;"></div>
+    <div class="star big" style="top:12%; left:66%; animation-delay:.2s;"></div>
+    <div class="star" style="top:24%; left:78%; animation-delay:1.6s;"></div>
+    <div class="star" style="top:6%; left:88%; animation-delay:.6s;"></div>
+    <div class="star big" style="top:28%; left:12%; animation-delay:1.9s;"></div>
+    <div class="star" style="top:32%; left:60%; animation-delay:1s;"></div>
+    <div class="star" style="top:18%; left:92%; animation-delay:1.4s;"></div>
+
+    <header>
+      <h1>hi, i'm adithi</h1>
+      <p>creative editor, storyteller</p>
+    </header>
+
+    <div class="icons">
+      <button class="icon-btn" onclick="openWindow('about')">
+        <span class="icon-glyph">🌞</span>
+        <span class="icon-label">about</span>
+      </button>
+      <button class="icon-btn" onclick="scrollToWork()">
+        <span class="icon-glyph">🗂️</span>
+        <span class="icon-label">works</span>
+      </button>
+      <button class="icon-btn" onclick="openWindow('links')">
+        <span class="icon-glyph">🔗</span>
+        <span class="icon-label">links</span>
+      </button>
+      <button class="icon-btn" onclick="openWindow('tools')">
+        <span class="icon-glyph">🎛️</span>
+        <span class="icon-label">tools</span>
+      </button>
+      <button class="icon-btn" onclick="openWindow('contact')">
+        <span class="icon-glyph">✉️</span>
+        <span class="icon-label">contact</span>
+      </button>
+    </div>
+
+    <div class="ground"></div>
+
+    <div class="mascot-wrap" id="mascotWrap" onclick="toggleSnailMusic()">
+      <svg class="mascot" viewBox="0 0 56 40" xmlns="http://www.w3.org/2000/svg">
+        <!-- shadow -->
+        <ellipse cx="26" cy="36" rx="24" ry="3" fill="#2b2438" opacity="0.12"/>
+        <!-- shell -->
+        <circle cx="20" cy="20" r="13" fill="#e5989b" stroke="#2b2438" stroke-width="2.5"/>
+        <path d="M20 20 m-8 0 a8 8 0 0 1 16 0 a5.5 5.5 0 0 1 -11 0 a3 3 0 0 1 6 0" fill="none" stroke="#2b2438" stroke-width="1.8" stroke-linecap="round"/>
+        <!-- body -->
+        <path d="M8 33 Q4 26 10 24 Q16 22 20 27 Q28 22 40 26 Q50 29 48 33 Q46 35 40 34 Q26 37 16 34 Q10 35 8 33 Z"
+              fill="#f5c84c" stroke="#2b2438" stroke-width="2.5" stroke-linejoin="round"/>
+        <!-- eye stalks -->
+        <path d="M44 27 Q47 19 46 14" stroke="#2b2438" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M48 28 Q52 21 51 16" stroke="#2b2438" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <circle cx="46" cy="13" r="2.3" fill="#2b2438"/>
+        <circle cx="51" cy="15" r="2.3" fill="#2b2438"/>
+        <!-- smile -->
+        <path d="M40 30 Q43 32 46 30" stroke="#2b2438" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="note note1">🎵</span>
+      <span class="note note2">🎶</span>
+      <span class="note note3">🎵</span>
+    </div>
+  </div>
+
+  <section id="work-section" class="work-section">
+    <h2>works</h2>
+    <div class="proj proj-clickable" onclick="openVideo()">
+      <h4>clients work</h4>
+      <p>edits which crossed millions of views on instagram.</p>
+    </div>
+    <div class="proj proj-clickable" onclick="openVideo2()">
+      <h4>creative detours</h4>
+      <p>edits made just for fun, no brief attached.</p>
+    </div>
+  </section>
+
+  <div class="disclaimer-box" id="disclaimerBox" onclick="toggleDisclaimer()">
+    <p class="disclaimer-title">disclaimer</p>
+    <p class="disclaimer-text" id="disclaimerText">if you are looking for someone who uses ai in their work, i am not the one for your work.</p>
+  </div>
+
+  <!-- 🎵 replace the src below with your own music file -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="music/your-music-file.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- windows -->
+  <div class="overlay" id="overlay">
+    <div class="window">
+      <div class="window-titlebar">
+        <span id="win-title">about</span>
+        <button class="window-close" onclick="closeWindow()">✕</button>
+      </div>
+      <div class="window-body" id="win-body"></div>
+    </div>
+  </div>
+
+  <!-- video gallery -->
+  <div class="overlay" id="videoOverlay">
+    <div class="window video-window">
+      <div class="window-titlebar">
+        <span>edits</span>
+        <button class="window-close" onclick="closeVideo()">✕</button>
+      </div>
+      <div class="video-gallery">
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <!-- 🎥 replace with your video file — its first frame is used as the cover -->
+            <video preload="metadata" playsinline muted>
+              <source src="videos/hanumankind.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">hanumankind</p>
+        </div>
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/dhvani.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">dhvani</p>
+        </div>
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/raftaar.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">raftaar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="videoOverlay2">
+    <div class="window video-window">
+      <div class="window-titlebar">
+        <span>creative detours</span>
+        <button class="window-close" onclick="closeVideo2()">✕</button>
+      </div>
+      <div class="video-gallery">
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/1000212126.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">detour one</p>
+        </div>
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/1000212127.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">detour two</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bigger popup player -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <div class="lightbox-content">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <video id="lightboxVideo" controls autoplay></video>
+    </div>
+  </div>
+
+<script>
+  const content = {
+    about: {
+      title: "about",
+      html: `
+        <!-- 🖼️ replace with your actual photo -->
+        <img class="about-photo" src="picture/me.jpg" alt="adithi">
+        <h3>hey, this is adithi.</h3>
+        <p>i'm an engineering graduate by degree, but this is the field i'm building my career in, on purpose.</p>
+        <p>even as a student, i got to work with a handful of clients including one edit that hit 42M views on instagram. you can check it out on the <a href="#work-section" onclick="closeWindow(); goToWorkAndPlay();">works page</a>.</p>
+        <p>from snappy transitions to cute, aesthetic storytelling edits and mograph work. i do both short form and long form, whatever the story needs.</p>
+        <p>you can trust me with your story and you won't regret it.</p>
+      `
+    },
+    links: {
+      title: "links",
+      html: `
+        <p>find me elsewhere:</p>
+        <div class="tag-row">
+          <a class="tag" href="https://www.instagram.com/adi._.thii?stkn=MXRjdnhwdGlhMGJuOQ==" target="_blank" rel="noopener">instagram</a>
+        </div>
+      `
+    },
+    tools: {
+      title: "tools",
+      html: `
+        <div class="tag-row">
+          <span class="tag">Premiere Pro</span>
+          <span class="tag">After Effects</span>
+          <span class="tag">Canva</span>
+          <span class="tag">Photoshop</span>
+        </div>
+      `
+    },
+    contact: {
+      title: "contact",
+      html: `
+        <h3>say hi!</h3>
+        <p>send a mail if you would like to work with me:</p>
+        <p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=adithiram20@gmail.com&su=Let%27s%20work%20together" target="_blank" rel="noopener">adithiram20@gmail.com</a></p>
+      `
+    }
+  };
+
+  let snailPlaying = false;
+  function toggleSnailMusic(){
+    const wrap = document.getElementById('mascotWrap');
+    const audio = document.getElementById('bgMusic');
+    snailPlaying = !snailPlaying;
+    if(snailPlaying){
+      wrap.classList.add('paused');
+      audio.play().catch(()=>{ /* no audio file set yet */ });
+    } else {
+      wrap.classList.remove('paused');
+      audio.pause();
+    }
+  }
+
+  function scrollToWork(){
+    document.getElementById('work-section').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function toggleDisclaimer(){
+    document.getElementById('disclaimerBox').classList.toggle('open');
+  }
+
+  function goToWorkAndPlay(){
+    scrollToWork();
+    setTimeout(()=>{
+      const lightboxVideo = document.getElementById('lightboxVideo');
+      lightboxVideo.src = 'videos/hanumankind.mp4';
+      document.getElementById('lightboxOverlay').classList.add('open');
+      lightboxVideo.play().catch(()=>{ /* video file not set yet */ });
+    }, 700);
+  }
+
+  function toggleMode(){
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('modeToggle').textContent = isDark ? '☀️' : '🌙';
+  }
+
+  function openVideo(){
+    document.getElementById('videoOverlay').classList.add('open');
+  }
+  function closeVideo(){
+    document.getElementById('videoOverlay').classList.remove('open');
+  }
+  function openVideo2(){
+    document.getElementById('videoOverlay2').classList.add('open');
+  }
+  function closeVideo2(){
+    document.getElementById('videoOverlay2').classList.remove('open');
+  }
+  function playVideo(coverEl){
+    const source = coverEl.querySelector('video source').src;
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    lightboxVideo.src = source;
+    document.getElementById('lightboxOverlay').classList.add('open');
+    lightboxVideo.play().catch(()=>{ /* video file not set yet */ });
+  }
+  function closeLightbox(){
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute('src');
+    lightboxVideo.load();
+    document.getElementById('lightboxOverlay').classList.remove('open');
+  }
+  document.getElementById('lightboxOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'lightboxOverlay') closeLightbox();
+  });
+  document.getElementById('videoOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'videoOverlay') closeVideo();
+  });
+  document.getElementById('videoOverlay2').addEventListener('click', (e)=>{
+    if(e.target.id === 'videoOverlay2') closeVideo2();
+  });
+
+  function openWindow(key){
+    document.getElementById('win-title').textContent = content[key].title;
+    document.getElementById('win-body').innerHTML = content[key].html;
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeWindow(){
+    document.getElementById('overlay').classList.remove('open');
+  }
+  document.getElementById('overlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'overlay') closeWindow();
+  });
+</script>
+
+</body>
+</html>
