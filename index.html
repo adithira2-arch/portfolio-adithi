@@ -605,6 +605,10 @@
       <h4>creative detours</h4>
       <p>edits made just for fun, no brief attached.</p>
     </div>
+    <div class="proj proj-clickable" onclick="openVideo3()">
+      <h4>mograph edits</h4>
+      <p>edits made in after effects.</p>
+    </div>
   </section>
 
   <div class="disclaimer-box" id="disclaimerBox" onclick="toggleDisclaimer()">
@@ -697,6 +701,35 @@
     </div>
   </div>
 
+  <div class="overlay" id="videoOverlay3">
+    <div class="window video-window">
+      <div class="window-titlebar">
+        <span>mograph edits</span>
+        <button class="window-close" onclick="closeVideo3()">✕</button>
+      </div>
+      <div class="video-gallery">
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/golden.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">golden</p>
+        </div>
+        <div class="video-item">
+          <div class="video-cover" onclick="playVideo(this)">
+            <video preload="metadata" playsinline muted>
+              <source src="videos/monalisa.mp4#t=0.1" type="video/mp4">
+            </video>
+            <div class="play-btn">▶</div>
+          </div>
+          <p class="video-caption">monalisa</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- bigger popup player -->
   <div class="lightbox-overlay" id="lightboxOverlay">
     <div class="lightbox-content">
@@ -744,7 +777,7 @@
       html: `
         <h3>say hi!</h3>
         <p>send a mail if you would like to work with me:</p>
-        <p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=adithiram20@gmail.com&su=Let%27s%20work%20together" target="_blank" rel="noopener">adithiram20@gmail.com</a></p>
+        <p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=adithiir2@gmail.com&su=Let%27s%20work%20together" target="_blank" rel="noopener">adithiir2@gmail.com</a></p>
       `
     }
   };
@@ -798,6 +831,12 @@
   function closeVideo2(){
     document.getElementById('videoOverlay2').classList.remove('open');
   }
+  function openVideo3(){
+    document.getElementById('videoOverlay3').classList.add('open');
+  }
+  function closeVideo3(){
+    document.getElementById('videoOverlay3').classList.remove('open');
+  }
   function playVideo(coverEl){
     const source = coverEl.querySelector('video source').src;
     const lightboxVideo = document.getElementById('lightboxVideo');
@@ -820,6 +859,9 @@
   });
   document.getElementById('videoOverlay2').addEventListener('click', (e)=>{
     if(e.target.id === 'videoOverlay2') closeVideo2();
+  });
+  document.getElementById('videoOverlay3').addEventListener('click', (e)=>{
+    if(e.target.id === 'videoOverlay3') closeVideo3();
   });
 
   function openWindow(key){
